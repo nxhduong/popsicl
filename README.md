@@ -1,23 +1,23 @@
 # SPCiaL
-***S***imple and ***P***opular ***C***onf***I***gur***A***tion ***L***anguage
+***S***imple and ***P***retty ***C***onf***I***gur***A***tion ***L***anguage
 
 SPCial is a Python-like minimal configuration language inspired by JSON.
+This repo contains a TypeScript SPCial parser
 
 ```
-* Filename: example.spcl
-**
-This is a
-multi-line comment
-**
-  root:
-    string = "This is a string"
-    number = 12345
-    "boolean value" = True
-    null = Nothing
-    array = ["element1", 2, false, null, {"nested": "object"}]
-    "nested object":
-      property1 = "value1"
-      property2 = 2
-      "property 3" = false
-      "property5" = ["array", "inside", "an", "object"]
+# This is a comment
+    hello = 'world'
+    root:
+        string = 'This is \\'a\\' string'
+        number = 12345
+        bool_val = True
+        nil = Nothing
+        array = []
+        nestedObj:
+            prop1 = 'value1'
+            prop2 = ['array', 'inside', 'an', 'object']
+
+    root -> array:
+        objInArray:
+            isIt = True
 ```
