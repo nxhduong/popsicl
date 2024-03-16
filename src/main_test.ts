@@ -3,7 +3,6 @@ import { Spcial } from "./main.ts";
 
 Deno.test(function addTest() {
     let testInput: string = `
-    # Filename: example.spc
     # This is a comment
     hello = 'world'
     root:
@@ -11,17 +10,16 @@ Deno.test(function addTest() {
         number = 12345
         bool_val = True
         nil = Nothing
-        array = []
+        array :=
+            * objInArray:
+                isIt = True
         nestedObj:
             prop1 = 'value1'
             prop2 = ['array', 'inside', 'an', 'object']
-
-    root -> array:
-        objInArray:
-            isIt = True
     `
 
     Deno.assertEquals(Spcial.toObjectFromString(testInput), {
+        hello: "world",
         root: {
             string: "This is 'a' string",
             number: 12345,
@@ -39,3 +37,37 @@ Deno.test(function addTest() {
         }
     });
 });
+
+Deno.test(function addTest() {
+    Deno.assertEquals({
+        hello: 'world',
+        root: {
+            string: "This is 'a' string",
+            number: 12345,
+            "bool_val": true,
+            nil: null,
+            array: [{
+                objInArray: {
+                    isIt: true
+                }
+            }],
+            nestedObj : {
+                prop1: 'val1',
+                prop2: ["array", "inside", "an", "object"]
+            }
+        }
+    }, `
+    hello = 'world'
+    root:
+        string = 'This is \\'a\\' string'
+        number = 12345
+        bool_val = True
+        nil = Nothing
+        array :=
+            * objInArray:
+                isIt = True
+        nestedObj:
+            prop1 = 'value1'
+            prop2 = ['array', 'inside', 'an', 'object']
+    `)
+})

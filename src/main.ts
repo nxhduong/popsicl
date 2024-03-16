@@ -1,9 +1,30 @@
 import { SpcialSyntaxError } from "./lib/SpcialSyntaxError.ts"
+import { SpcialValueError } from "./lib/SpcialValueError.ts"
 
 export { Spcial }
 
 class Spcial 
 {
+    /**
+     * Parses a SPCiaL string, outputting a JavaScript object 
+     * @param spcialString SPCiaL string
+     * @returns Native JS object
+     */
+    public static toObjectFromString(spcialString: string): object 
+    {
+        return this.parseChild(spcialString)
+    }
+
+    /**
+     * Converts a Javascript object into a SPCiaL string
+     * @param obj JS object as input
+     * @returns SPCiaL string
+     */
+    public static toSpcialString(obj: object): string 
+    {
+        return this.stringifyObject(obj, 0)
+    }
+
     private static isEnclosedBy(input: string, index: number, char: string[]): boolean 
     {
         // TODO: escaped, char in string
@@ -18,8 +39,58 @@ class Spcial
         }
     }
 
-    private static stringifyObject(obj: object): string {
-        return ""
+    private static stringifyObject(obj: object, indent: number): string 
+    {
+        let spcialString: string = ""
+
+        if (Array.isArray(obj)) {
+            throw new SpcialValueError(obj)
+        }
+
+        for (const [key, value] of Object.entries(obj)) 
+        {
+            switch (typeof value) 
+            {
+                case "string":
+                    spcialString += " ".repeat(indent) + `${key} = '${value.replace("'", "\\'")}\n'`
+                    break
+                case "number":
+                    if (Number.isNaN(value)) 
+                    {
+                        throw new SpcialValueError(value)
+                    }
+
+                    spcialString += " ".repeat(indent) + `${key} = ${value}\n`
+                    break
+                case "boolean":
+                    spcialString += " ".repeat(indent) + `${key} = ${value? "True" : "False"}\n`
+                    break
+                case "object":
+                    if (Array.isArray(value)) 
+                    {
+                        for (let i = 1; i < value.length; i++) {
+                            if (typeof value[i - 1] != typeof value[i]) {
+                                throw new SpcialValueError(value)
+                            }
+                        }
+
+                        if (value.findIndex((element) => typeof element == "object") != -1) {
+                            // TODO:
+                        } else {
+                            spcialString += " ".repeat(indent) + `${key} = [${value}]\n`
+                        }
+                    } 
+                    else 
+                    {
+                        spcialString += " ".repeat(indent) + `${key}:\n    ${this.stringifyObject(value, indent + 4)}\n`
+                    }
+                    break
+                default:
+                    throw new SpcialValueError(value)
+            }
+        }
+
+        return spcialString
     }
 
     private static evaluate(spcialValue: string, srcCode: string, line: string, lineNum: number): any 
@@ -152,25 +223,5 @@ class Spcial
         }
 
         return obj
-    }
-
-    /**
-     * Parses a SPCiaL string, outputting a JavaScript object 
-     * @param spcialString SPCiaL string
-     * @returns Native JS object
-     */
-    public static toObjectFromString(spcialString: string): object 
-    {
-        return this.parseChild(spcialString)
-    }
-
-    /**
-     * Converts a Javascript object into a SPCiaL string
-     * @param spcialObj JS object as input
-     * @returns SPCiaL string
-     */
-    public static toSpcialString(spcialObj: object): string 
-    {
-        throw new Error("Not implemented yet")
     }
 }
