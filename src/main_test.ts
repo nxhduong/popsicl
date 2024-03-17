@@ -14,7 +14,7 @@ Deno.test(function addTest() {
             * objInArray:
                 isIt = True
         nestedObj:
-            prop1 = 'value1'
+            prop1 = "value1"
             prop2 = ['array', 'inside', 'an', 'object']
     `
 
@@ -31,7 +31,7 @@ Deno.test(function addTest() {
                 }
             }],
             nestedObj : {
-                prop1: 'val1',
+                prop1: 'value1',
                 prop2: ["array", "inside", "an", "object"]
             }
         }

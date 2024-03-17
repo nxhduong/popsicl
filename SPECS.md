@@ -30,9 +30,10 @@ Syntax:
     Key = Value
 ## Data types and structures
 ### Strings
-Strings must be single-quoted:
+Strings must be either single-quoted or double-quoted:
 
     'This is a string'
+    "This is another string"
 
 Multi-line strings are not allowed (yet)
 ### Numbers

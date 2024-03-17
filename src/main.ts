@@ -6,17 +6,17 @@ export { Spcial }
 class Spcial 
 {
     /**
-     * Parses a SPCiaL string, outputting a JavaScript object 
+     * Outputs equivalent JavaScript object from SPCiaL string
      * @param spcialString SPCiaL string
      * @returns Native JS object
      */
     public static toObjectFromString(spcialString: string): object 
     {
-        return this.parseChild(spcialString)
+        return this.parse(spcialString)
     }
 
     /**
-     * Converts a Javascript object into a SPCiaL string
+     * Converts a Javascript object to a SPCiaL string
      * @param obj JS object as input
      * @returns SPCiaL string
      */
@@ -60,23 +60,43 @@ class Spcial
                         throw new SpcialValueError(value)
                     }
 
+                    // Check Infinity
+                    try
+                    {
+                        JSON.parse(value.toString())
+                    } 
+                    catch
+                    {
+                        throw new SpcialValueError(value)
+                    } 
+
                     spcialString += " ".repeat(indent) + `${key} = ${value}\n`
                     break
                 case "boolean":
                     spcialString += " ".repeat(indent) + `${key} = ${value? "True" : "False"}\n`
                     break
                 case "object":
+                    if (value == null)
+                    {
+                        spcialString += " ".repeat(indent) + `${key} = Nothing\n`
+                    }
+
                     if (Array.isArray(value)) 
                     {
-                        for (let i = 1; i < value.length; i++) {
-                            if (typeof value[i - 1] != typeof value[i]) {
+                        for (let i = 1; i < value.length; i++) 
+                        {
+                            if (typeof value[i - 1] != typeof value[i]) 
+                            {
                                 throw new SpcialValueError(value)
                             }
                         }
 
-                        if (value.findIndex((element) => typeof element == "object") != -1) {
-                            // TODO:
-                        } else {
+                        if (value.findIndex((element) => typeof element == "object") != -1) 
+                        {
+                            // TODO: multi-line array
+                        } 
+                        else 
+                        {
                             spcialString += " ".repeat(indent) + `${key} = [${value}]\n`
                         }
                     } 
@@ -93,8 +113,15 @@ class Spcial
         return spcialString
     }
 
-    private static evaluate(spcialValue: string, srcCode: string, line: string, lineNum: number): any 
+    /**
+     * Converts SPCiaL values to corresponding native values
+     * @param spcialValue 
+     * @returns JS/TS equivalent value
+     */
+    private static evaluate(spcialValue: string): any 
     {
+        spcialValue = spcialValue.trim()
+
         if (spcialValue == "True") 
         {
             return true
@@ -107,39 +134,39 @@ class Spcial
         {
             return null
         } 
-        else if (spcialValue == "@") 
-        {
-            let arr: any[] = []
-
-            for (let child of this.getChildren(srcCode, line, lineNum).split("|")) 
-            {
-                if (child.trim().length > 0) 
-                {
-                    arr.push(this.evaluate(child.trim(), srcCode, line, lineNum))
-                }
-            }
-
-            return arr
-        } 
-        else if (spcialValue == "$") 
-        {
-
-        } 
         else if (!Number.isNaN(Number(spcialValue))) 
         {
             return Number(spcialValue)
         } 
-        else if (spcialValue[0] == "'" && spcialValue[spcialValue.length - 1] == "'") 
+        else if ((spcialValue[0] == "'" || spcialValue[0] == "\"") 
+        && (spcialValue[spcialValue.length - 1] == spcialValue[0])) 
         {
             return spcialValue
         } 
-        else if (spcialValue[0] == "[") 
+        else if (spcialValue[0] == "[" && spcialValue[spcialValue.length - 1] == "]") 
         {
+            let arr = JSON.parse(spcialValue)
 
+            for (let i = 1; i < arr.length; i++) 
+            {
+                if (typeof arr[i - 1] != typeof arr[i]) 
+                {
+                    throw new SpcialValueError(arr)
+                }
+            }
+
+            if (arr.findIndex((element: any) => typeof element == "object" && !Array.isArray(element)) != -1) 
+            {
+                throw new SpcialSyntaxError()
+            } 
+            else 
+            {
+                return arr
+            }
         } 
         else 
         {
-            throw new SpcialSyntaxError(line, lineNum)
+            throw new SpcialSyntaxError()
         }
     }
 
@@ -152,59 +179,88 @@ class Spcial
         {
             if (codeArray[i].length - codeArray[i].trimStart().length 
                 > 4 + line.length - line.trimStart().length)
-                {
+            {
                 child += codeArray[i]
+            }
+            else
+            {
+                break
             }
         }
 
         return child
     }
 
-    private static parseChild(srcCode: string): object 
+    private static parse(srcCode: string): object 
     {
         let obj = {}
 
         for (const [lineNum, line] of srcCode.split("\n").entries()) 
         {
-            if (line.trim()[0] == "#" || line.trim()[0] == "|") 
+            if (line.trim() == '' || line.trim()[0] == "#") 
             {
+                // Comments and empty lines
                 continue
             } 
-            else if (line.trim()[line.length - 1] == ":") 
+            else if (line.trim()[0] == "*") 
             {
-                if (line.includes("->")) 
-                {
-                    let sides = line.split("->")
+                //TODO: check array
+            }
+            else if (line.trim().slice(line.length - 2, line.length) == ":=")
+            {
+                // Multi-line array
+                let arr: any[] = []
 
-                    for (let side of sides) 
+                for (let child of this.getChildren(srcCode, line, lineNum).split("*")) 
+                {
+                    if (child.trim().length > 0) 
                     {
-                        if (side.match(/[^\w\d\s:]/g) != null)
+                        let element: any = null
+
+                        // object type and other types
+                        if (child[child.length -1] == ":")
                         {
-                            throw new SpcialSyntaxError(line, lineNum)
+                            element = this.parse(this.getChildren(srcCode, line, lineNum))
+                        }
+                        else
+                        {
+                            element = this.evaluate(child.trim())
+                        }
+
+                        // Array elements must be the same type
+                        if (arr.length > 0 && typeof element != typeof arr[arr.length - 1])
+                        {
+                            throw new SpcialValueError(element)
+                        }
+                        else
+                        {
+                            arr.push(element)
                         }
                     }
-
-                    obj[sides[0]][sides[1]].push(this.parseChild(this.getChildren(srcCode, line, lineNum)))
-                } 
-                else 
-                {
-                    if (line.match(/[^\w\d\s:]/g) != null) 
-                    {
-                        throw new SpcialSyntaxError(line, lineNum)
-                    }
-
-                    this.parseChild(this.getChildren(srcCode, line, lineNum))
                 }
-                
+    
+                return arr
+            }
+            else if (line.trim()[line.length - 1] == ":") 
+            {
+                // Object keys
+                if (line.match(/[^\w\d\s:]/g) != null) 
+                {
+                    throw new SpcialSyntaxError(line, lineNum)
+                }
+
+                obj[line.trim().replace(":", "")] = this.parse(this.getChildren(srcCode, line, lineNum))              
             } 
             else if (line.includes("=")) 
             {
+                // Key-value pairs
                 let key = line.split("=")[0]
-                let rhs = line.replace(key, "").trim()
+                let rhs = line.replace(key + "=", "").trim()
 
+                // Remove comments
                 for (let i = rhs.length - 1; i >= 0; i--) 
                 {
-                    if (rhs[i] == "'") 
+                    if (rhs[i] == "'" || rhs[i] == "\"") 
                     {
                         break
                     } 
@@ -214,7 +270,17 @@ class Spcial
                     }
                 }
 
-                obj[key] = this.evaluate(rhs, srcCode, line, lineNum)
+                try 
+                {
+                    obj[key.trim()] = this.evaluate(rhs)
+                }
+                catch (err)
+                {
+                    if (err instanceof SpcialSyntaxError) 
+                    {
+                        throw new SpcialSyntaxError(line, lineNum)
+                    }
+                }
             }
             else 
             {
