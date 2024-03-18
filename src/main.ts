@@ -25,7 +25,7 @@ class Spcial
         return this.toSpcialEquivalent(obj, 0)
     }
 
-    // Convert each key-value pair
+    // This function converts each key-value pair
     private static toSpcialEquivalent(obj: object, indent: number): string 
     {
         let spcialString: string = ""
@@ -41,13 +41,14 @@ class Spcial
                 case "string":
                     spcialString += " ".repeat(indent) + `${key} = '${value.replace("'", "\\'")}\n'`
                     break
+                    
                 case "number":
                     if (Number.isNaN(value)) 
                     {
                         throw new SpcialValueError(value)
                     }
 
-                    // Check Infinity
+                    // Check for Infinity
                     try
                     {
                         JSON.parse(value.toString())
@@ -59,9 +60,11 @@ class Spcial
 
                     spcialString += " ".repeat(indent) + `${key} = ${value}\n`
                     break
+
                 case "boolean":
                     spcialString += " ".repeat(indent) + `${key} = ${value? "True" : "False"}\n`
                     break
+
                 case "object":
                     if (value == null)
                     {
@@ -105,6 +108,7 @@ class Spcial
                         spcialString += " ".repeat(indent) + `${key}:\n${this.toSpcialEquivalent(value, indent + 4)}`
                     }
                     break
+
                 default:
                     throw new SpcialValueError(value)
             }
@@ -199,7 +203,7 @@ class Spcial
         {
             if (line.trim() == '' || line.trim()[0] == "#") 
             {
-                // Comments and empty lines
+                // Ignore comments and empty lines
                 continue
             } 
             else if (line.trim()[0] == "*") 
@@ -217,7 +221,7 @@ class Spcial
                     {
                         let element: any = null
 
-                        // object type and other types
+                        // Object and other types
                         if (child[child.length -1] == ":")
                         {
                             element = this.parse(this.getChildren(srcCode, line, lineNum))
