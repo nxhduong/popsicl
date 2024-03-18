@@ -22,24 +22,11 @@ class Spcial
      */
     public static toSpcialString(obj: object): string 
     {
-        return this.stringifyObject(obj, 0)
+        return this.toSpcialEquivalent(obj, 0)
     }
 
-    private static isEnclosedBy(input: string, index: number, char: string[]): boolean 
-    {
-        // TODO: escaped, char in string
-        if ((input.substring(0, index).match(new RegExp("(?<!\/)" + char[0], "g")) || []).length
-        == (input.substring(index, input.length).match(new RegExp("(?<!\/)" + char[1], "g")) || []).length) 
-        {
-            return true
-        } 
-        else 
-        {
-            return false
-        }
-    }
-
-    private static stringifyObject(obj: object, indent: number): string 
+    // Convert each key-value pair
+    private static toSpcialEquivalent(obj: object, indent: number): string 
     {
         let spcialString: string = ""
 
@@ -93,16 +80,29 @@ class Spcial
 
                         if (value.findIndex((element) => typeof element == "object") != -1) 
                         {
-                            // TODO: multi-line array
+                            spcialString += " ".repeat(indent) + `${key} :=`
+
+                            for (const element of value)
+                            {
+                                spcialString += " ".repeat(indent + 4) + `* ${element.toSpcialEquivalent(element, 0).replace(`${key} =`, "").trim()}`
+                            }
                         } 
                         else 
                         {
-                            spcialString += " ".repeat(indent) + `${key} = [${value}]\n`
+                            let arrString = ""
+
+                            for (const element of value)
+                            {
+                                // Convert but remove the "key =" part
+                                arrString += this.toSpcialEquivalent(element, 0).replace(`${key} =`, "") + ","
+                            }
+
+                            spcialString += " ".repeat(indent) + `${key} = [${arrString}]\n`
                         }
                     } 
                     else 
                     {
-                        spcialString += " ".repeat(indent) + `${key}:\n    ${this.stringifyObject(value, indent + 4)}\n`
+                        spcialString += " ".repeat(indent) + `${key}:\n${this.toSpcialEquivalent(value, indent + 4)}`
                     }
                     break
                 default:

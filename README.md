@@ -3,7 +3,7 @@
 
 SPCial is a Python-like minimal configuration language inspired by JSON.
 
-It is simple, readable, and safe (does not allow expressions evaluation).
+It is simple, readable, predictable (no gotchas), and safe (does not allow expressions evaluation).
 
 This repo contains a TypeScript SPCial parser (WIP) which you can include as a library.
 
