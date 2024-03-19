@@ -145,11 +145,12 @@ class Spcial
             return Number(spcialValue)
         } 
         else if ((spcialValue[0] == "'" || spcialValue[0] == "\"") 
-        && (spcialValue[spcialValue.length - 1] == spcialValue[0])) 
+        && (spcialValue.slice(-1) == spcialValue[0])) 
         {
-            return spcialValue
+            // TODO: ignore '/' case
+            return spcialValue.slice(1, -1).replaceAll("\\" + "'", "\'").replaceAll("\\" + '"', "\"")
         } 
-        else if (spcialValue[0] == "[" && spcialValue[spcialValue.length - 1] == "]") 
+        else if (spcialValue[0] == "[" && spcialValue.slice(-1) == "]") 
         {
             const arr = JSON.parse(spcialValue)
 
@@ -184,9 +185,9 @@ class Spcial
         for (let i = lineNum + 1; i < codeArray.length; i++) 
         {
             if (codeArray[i].length - codeArray[i].trimStart().length 
-                > 4 + line.length - line.trimStart().length)
+                >= 4 + line.length - line.trimStart().length)
             {
-                child += codeArray[i]
+                child += codeArray[i] + "\n"
             }
             else
             {
@@ -213,7 +214,7 @@ class Spcial
             {
                 //TODO: check if element is child of an array
             }
-            else if (linesOfCode[lineNum].trim().slice(linesOfCode[lineNum].length - 2, linesOfCode[lineNum].length) == ":=")
+            else if (linesOfCode[lineNum].trim().slice(-2) == ":=")
             {
                 // Multi-line array
                 const arr = []
@@ -226,7 +227,7 @@ class Spcial
                         let element = null
 
                         // Object and other types
-                        if (child[child.length -1] == ":")
+                        if (child.split("\n")[0].slice(-1) == ":")
                         {
                             element = this.parse(this.getChildren(srcCode, linesOfCode[lineNum], lineNum))
                         }
@@ -246,11 +247,10 @@ class Spcial
                         }
                     }
                 }
-    
-                obj[linesOfCode[lineNum].trim().replace(":=", "")] = arr
+                obj[linesOfCode[lineNum].replace(":=", "").trim()] = arr
 
                 // Skip lines
-                lineNum += elements.length + 1
+                lineNum += elements.length
             }
             else if (linesOfCode[lineNum].trim().split("").pop() == ":") 
             {
@@ -264,12 +264,12 @@ class Spcial
                 obj[linesOfCode[lineNum].trim().replace(":", "")] = this.parse(children)
                 
                 // Skip lines
-                lineNum += children.length + 1
+                lineNum += children.length
             } 
             else if (linesOfCode[lineNum].includes("=")) 
             {
                 // Key-value pairs
-                const key = linesOfCode[lineNum].split("=")[0].trim()
+                const key = linesOfCode[lineNum].split("=")[0]
                 let rhs = linesOfCode[lineNum].replace(key + "=", "").trim()
 
                 // Remove comments
@@ -306,3 +306,20 @@ class Spcial
         return obj
     }
 }
+
+let testInput = `
+# This is a comment
+hello = 'world'
+root:
+    string = 'This is \\'a\\' string'
+    number = 12345
+    bool_val = True
+    nil = Nothing
+    array :=
+        * objInArray:
+            isIt = True
+    nestedObj:
+        prop1 = "value1"
+        prop2 = ['array', 'inside', 'an', 'object']
+`
+console.log(Spcial.toObjectFromString(testInput))

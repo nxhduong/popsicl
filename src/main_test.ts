@@ -6,7 +6,7 @@ Deno.test(function addTest() {
     # This is a comment
     hello = 'world'
     root:
-        string = 'This is \\'a\\' string'
+        string = 'This is \'a\' string'
         number = 12345
         bool_val = True
         nil = Nothing
@@ -72,19 +72,3 @@ Deno.test(function addTest() {
     `)
 })
 
-let testInput = `
-# This is a comment
-hello = 'world'
-root:
-    string = 'This is \\'a\\' string'
-    number = 12345
-    bool_val = True
-    nil = Nothing
-    array :=
-        * objInArray:
-            isIt = True
-    nestedObj:
-        prop1 = "value1"
-        prop2 = ['array', 'inside', 'an', 'object']
-`
-//    console.log(Spcial.toObjectFromString(testInput))
