@@ -1,3 +1,5 @@
+// deno-lint-ignore-file no-explicit-any
+
 import { SpcialSyntaxError } from "./lib/SpcialSyntaxError.ts"
 import { SpcialValueError } from "./lib/SpcialValueError.ts"
 
@@ -10,7 +12,7 @@ class Spcial
      * @param spcialString SPCiaL string
      * @returns Native JS object
      */
-    public static toObjectFromString(spcialString: string): object 
+    public static toObjectFromString(spcialString: string): object
     {
         return this.parse(spcialString)
     }
@@ -20,15 +22,15 @@ class Spcial
      * @param obj JS object as input
      * @returns SPCiaL string
      */
-    public static toSpcialString(obj: object): string 
+    public static toSpcialString(obj: object): string
     {
         return this.toSpcialEquivalent(obj, 0)
     }
 
     // This function converts each key-value pair
-    private static toSpcialEquivalent(obj: object, indent: number): string 
+    public static toSpcialEquivalent(obj: object, indent: number)
     {
-        let spcialString: string = ""
+        let spcialString = ""
 
         if (Array.isArray(obj)) {
             throw new SpcialValueError(obj)
@@ -122,7 +124,7 @@ class Spcial
      * @param spcialValue 
      * @returns JS/TS equivalent value
      */
-    private static evaluate(spcialValue: string): any 
+    private static evaluate(spcialValue: string): any
     {
         spcialValue = spcialValue.trim()
 
@@ -149,7 +151,7 @@ class Spcial
         } 
         else if (spcialValue[0] == "[" && spcialValue[spcialValue.length - 1] == "]") 
         {
-            let arr = JSON.parse(spcialValue)
+            const arr = JSON.parse(spcialValue)
 
             for (let i = 1; i < arr.length; i++) 
             {
@@ -176,10 +178,10 @@ class Spcial
 
     private static getChildren(srcCode: string, line: string, lineNum: number) 
     {
-        let child: string = ""
-        let codeArray = srcCode.split('\n')
+        let child = ""
+        const codeArray = srcCode.split('\n')
         
-        for (let i = lineNum; i < codeArray.length; i++) 
+        for (let i = lineNum + 1; i < codeArray.length; i++) 
         {
             if (codeArray[i].length - codeArray[i].trimStart().length 
                 > 4 + line.length - line.trimStart().length)
@@ -195,36 +197,38 @@ class Spcial
         return child
     }
 
-    private static parse(srcCode: string): object 
+    private static parse(srcCode: string): object
     {
-        let obj = {}
+        const obj: {[key: string]: any} = {}
+        const linesOfCode = srcCode.split("\n")
 
-        for (const [lineNum, line] of srcCode.split("\n").entries()) 
+        for (let lineNum = 0; lineNum < linesOfCode.length; lineNum++)
         {
-            if (line.trim() == '' || line.trim()[0] == "#") 
+            if (linesOfCode[lineNum].trim() == '' || linesOfCode[lineNum].trim()[0] == "#") 
             {
                 // Ignore comments and empty lines
                 continue
             } 
-            else if (line.trim()[0] == "*") 
+            else if (linesOfCode[lineNum].trim()[0] == "*") 
             {
-                //TODO: check array
+                //TODO: check if element is child of an array
             }
-            else if (line.trim().slice(line.length - 2, line.length) == ":=")
+            else if (linesOfCode[lineNum].trim().slice(linesOfCode[lineNum].length - 2, linesOfCode[lineNum].length) == ":=")
             {
                 // Multi-line array
-                let arr: any[] = []
+                const arr = []
+                const elements = this.getChildren(srcCode, linesOfCode[lineNum], lineNum).split("*")
 
-                for (let child of this.getChildren(srcCode, line, lineNum).split("*")) 
+                for (const child of elements) 
                 {
                     if (child.trim().length > 0) 
                     {
-                        let element: any = null
+                        let element = null
 
                         // Object and other types
                         if (child[child.length -1] == ":")
                         {
-                            element = this.parse(this.getChildren(srcCode, line, lineNum))
+                            element = this.parse(this.getChildren(srcCode, linesOfCode[lineNum], lineNum))
                         }
                         else
                         {
@@ -243,23 +247,30 @@ class Spcial
                     }
                 }
     
-                return arr
+                obj[linesOfCode[lineNum].trim().replace(":=", "")] = arr
+
+                // Skip lines
+                lineNum += elements.length + 1
             }
-            else if (line.trim()[line.length - 1] == ":") 
+            else if (linesOfCode[lineNum].trim().split("").pop() == ":") 
             {
                 // Object keys
-                if (line.match(/[^\w\d\s:]/g) != null) 
+                if (linesOfCode[lineNum].match(/[^\w\d\s:]/g) != null) 
                 {
-                    throw new SpcialSyntaxError(line, lineNum)
+                    throw new SpcialSyntaxError(linesOfCode[lineNum], lineNum)
                 }
 
-                obj[line.trim().replace(":", "")] = this.parse(this.getChildren(srcCode, line, lineNum))              
+                const children = this.getChildren(srcCode, linesOfCode[lineNum], lineNum)
+                obj[linesOfCode[lineNum].trim().replace(":", "")] = this.parse(children)
+                
+                // Skip lines
+                lineNum += children.length + 1
             } 
-            else if (line.includes("=")) 
+            else if (linesOfCode[lineNum].includes("=")) 
             {
                 // Key-value pairs
-                let key = line.split("=")[0]
-                let rhs = line.replace(key + "=", "").trim()
+                const key = linesOfCode[lineNum].split("=")[0].trim()
+                let rhs = linesOfCode[lineNum].replace(key + "=", "").trim()
 
                 // Remove comments
                 for (let i = rhs.length - 1; i >= 0; i--) 
@@ -282,13 +293,13 @@ class Spcial
                 {
                     if (err instanceof SpcialSyntaxError) 
                     {
-                        throw new SpcialSyntaxError(line, lineNum)
+                        throw new SpcialSyntaxError(linesOfCode[lineNum], lineNum)
                     }
                 }
             }
             else 
             {
-                throw new SpcialSyntaxError(line, lineNum)
+                throw new SpcialSyntaxError(linesOfCode[lineNum], lineNum)
             }
         }
 

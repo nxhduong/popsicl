@@ -1,8 +1,8 @@
-import { Deno } from "https://deno.land/std@0.205.0/assert/mod.ts";
+import { assertEquals } from "https://deno.land/std@0.205.0/assert/mod.ts";
 import { Spcial } from "./main.ts";
 
 Deno.test(function addTest() {
-    let testInput: string = `
+    let testInput = `
     # This is a comment
     hello = 'world'
     root:
@@ -18,7 +18,7 @@ Deno.test(function addTest() {
             prop2 = ['array', 'inside', 'an', 'object']
     `
 
-    Deno.assertEquals(Spcial.toObjectFromString(testInput), {
+    assertEquals(Spcial.toObjectFromString(testInput), {
         hello: "world",
         root: {
             string: "This is 'a' string",
@@ -39,7 +39,7 @@ Deno.test(function addTest() {
 });
 
 Deno.test(function addTest() {
-    Deno.assertEquals({
+    assertEquals(Spcial.toSpcialString({
         hello: 'world',
         root: {
             string: "This is 'a' string",
@@ -56,8 +56,8 @@ Deno.test(function addTest() {
                 prop2: ["array", "inside", "an", "object"]
             }
         }
-    }, `
-    hello = 'world'
+    }), 
+    `hello = 'world'
     root:
         string = 'This is \\'a\\' string'
         number = 12345
@@ -71,3 +71,20 @@ Deno.test(function addTest() {
             prop2 = ['array', 'inside', 'an', 'object']
     `)
 })
+
+let testInput = `
+# This is a comment
+hello = 'world'
+root:
+    string = 'This is \\'a\\' string'
+    number = 12345
+    bool_val = True
+    nil = Nothing
+    array :=
+        * objInArray:
+            isIt = True
+    nestedObj:
+        prop1 = "value1"
+        prop2 = ['array', 'inside', 'an', 'object']
+`
+//    console.log(Spcial.toObjectFromString(testInput))
