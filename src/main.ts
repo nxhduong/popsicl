@@ -37,7 +37,7 @@ class Spcial
             switch (typeof value) 
             {
                 case "string":
-                    spcialString += " ".repeat(indent) + `${key} = '${value.replaceAll("'", "\\'")}'\n`
+                    spcialString += " ".repeat(indent) + `${key} = "${value.replaceAll('"', '\\"')}"\n`
                     break
                     
                 case "number":
@@ -143,11 +143,11 @@ class Spcial
         {
             return Number(spcialValue)
         } 
-        else if ((spcialValue[0] == "'" || spcialValue[0] == "\"") 
+        else if ((spcialValue[0] == "\"") 
         && (spcialValue.slice(-1) == spcialValue[0])) 
         {
             // TODO: ignore '/' case
-            return spcialValue.slice(1, -1).replaceAll("\\" + "'", "\'").replaceAll("\\" + '"', "\"")
+            return spcialValue.slice(1, -1).replaceAll("\\" + '"', "\"")
         } 
         else if (spcialValue[0] == "[" && spcialValue.slice(-1) == "]") 
         {
@@ -274,7 +274,7 @@ class Spcial
                 // Remove comments
                 for (let i = rhs.length - 1; i >= 0; i--) 
                 {
-                    if (rhs[i] == "'" || rhs[i] == "\"") 
+                    if (rhs[i] == "\"") 
                     {
                         break
                     } 
@@ -294,6 +294,10 @@ class Spcial
                     {
                         throw new SpcialSyntaxError(linesOfCode[lineNum], lineNum)
                     }
+                    else
+                    {
+                        throw err
+                    }
                 }
             }
             else 
@@ -305,20 +309,3 @@ class Spcial
         return obj
     }
 }
-
-let testInput = `
-# This is a comment
-hello = 'world'
-root:
-    string = 'This is \\'a\\' string'
-    number = 12345
-    bool_val = True
-    nil = Nothing
-    array :=
-        * :
-            isIt = True
-    nestedObj:
-        prop1 = "value1"
-        prop2 = ['array', 'inside', 'an', 'object']
-`
-console.log(Spcial.toObjectFromString(testInput))

@@ -4,9 +4,9 @@ import { Spcial } from "./main.ts";
 Deno.test(function addTest() {
     const testInput = `
     # This is a comment
-    hello = 'world'
+    hello = "world"
     root:
-        string = 'This is \'a\' string'
+        string = "This is \"a\" string"
         number = 12345
         bool_val = True
         nil = Nothing
@@ -15,13 +15,13 @@ Deno.test(function addTest() {
                 objInArray = True
         nestedObj:
             prop1 = "value1"
-            prop2 = ['array', 'inside', 'an', 'object']
+            prop2 = ["array", "inside", "an", "object"]
     `
 
     assertEquals(Spcial.toObjectFromString(testInput), {
         hello: "world",
         root: {
-            string: "This is 'a' string",
+            string: 'This is "a" string',
             number: 12345,
             "bool_val": true,
             nil: null,
@@ -29,7 +29,7 @@ Deno.test(function addTest() {
                 objInArray: true
             }],
             nestedObj : {
-                prop1: 'value1',
+                prop1: "value1",
                 prop2: ["array", "inside", "an", "object"]
             }
         }
@@ -40,7 +40,7 @@ Deno.test(function addTest() {
     assertEquals(Spcial.toSpcialString({
         hello: 'world',
         root: {
-            string: "This is 'a' string",
+            string: 'This is "a" string',
             number: 12345,
             "bool_val": true,
             nil: null,
@@ -48,14 +48,14 @@ Deno.test(function addTest() {
                 objInArray: true
             }],
             nestedObj: {
-                prop1: 'value1',
+                prop1: "value1",
                 prop2: ["array", "inside", "an", "object"]
             }
         }
     }), 
-`hello = 'world'
+`hello = "world"
 root:
-    string = 'This is \\'a\\' string'
+    string = "This is \\"a\\" string"
     number = 12345
     bool_val = True
     nil = Nothing
@@ -63,8 +63,8 @@ root:
         * :
             objInArray = True
     nestedObj:
-        prop1 = 'value1'
-        prop2 = ['array','inside','an','object']
+        prop1 = "value1"
+        prop2 = ["array","inside","an","object"]
 `)
 })
 

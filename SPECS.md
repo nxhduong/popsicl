@@ -2,9 +2,9 @@
 SPCiaL files have the extension of `.spc`
 ```
     # This is a comment
-    hello = 'world'
+    hello = "world"
     root:
-        string = 'This is \\'a\\' string'
+        string = "This is \\"a\\" string"
         number = 12345
         bool_val = True
         nil = Nothing
@@ -12,8 +12,8 @@ SPCiaL files have the extension of `.spc`
             * :
                 objInArray = True
         nestedObj:
-            prop1 = 'value1'
-            prop2 = ['array', 'inside', 'an', 'object']
+            prop1 = "value1"
+            prop2 = ["array", "inside", "an", "object"]
 ```
 ## Comments
 Comments start with `#`:
@@ -30,9 +30,8 @@ Syntax:
     Key = Value
 ## Data types and structures
 ### Strings
-Strings must be either single-quoted or double-quoted:
+Strings must be double-quoted:
 
-    'This is a string'
     "This is another string"
 
 Multi-line strings are not allowed (yet)

@@ -10,9 +10,9 @@ This repo contains a TypeScript SPCial parser (WIP) which you can include as a l
 ```
     # Filename: example.spc
     # This is a comment
-    hello = 'world'
+    hello = "world"
     root:
-        string = 'This is \\'a\\' string'
+        string = "This is \\"a\\" string"
         number = 12345
         bool_val = True
         nil = Nothing
@@ -20,8 +20,8 @@ This repo contains a TypeScript SPCial parser (WIP) which you can include as a l
             * :
                 objInArray = True
         nestedObj:
-            prop1 = 'value1'
-            prop2 = ['array', 'inside', 'an', 'object']
+            prop1 = "value1"
+            prop2 = ["array", "inside", "an", "object"]
 ```
 ## Contribute to this project
 All contributions and suggestions are greatly appreciated
