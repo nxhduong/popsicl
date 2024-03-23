@@ -17,8 +17,8 @@ This repo contains a TypeScript SPCial parser (WIP) which you can include as a l
         bool_val = True
         nil = Nothing
         array :=
-            * objInArray:
-                isIt = True
+            * :
+                objInArray = True
         nestedObj:
             prop1 = 'value1'
             prop2 = ['array', 'inside', 'an', 'object']

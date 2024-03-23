@@ -9,8 +9,8 @@ SPCiaL files have the extension of `.spc`
         bool_val = True
         nil = Nothing
         array = :=
-            * objInArray:
-                isIt = True
+            * :
+                objInArray = True
         nestedObj:
             prop1 = 'value1'
             prop2 = ['array', 'inside', 'an', 'object']

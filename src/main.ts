@@ -32,16 +32,12 @@ class Spcial
     {
         let spcialString = ""
 
-        if (Array.isArray(obj)) {
-            throw new SpcialValueError(obj)
-        }
-
         for (const [key, value] of Object.entries(obj)) 
         {
             switch (typeof value) 
             {
                 case "string":
-                    spcialString += " ".repeat(indent) + `${key} = '${value.replace("'", "\\'")}\n'`
+                    spcialString += " ".repeat(indent) + `${key} = '${value.replaceAll("'", "\\'")}'\n`
                     break
                     
                 case "number":
@@ -71,6 +67,7 @@ class Spcial
                     if (value == null)
                     {
                         spcialString += " ".repeat(indent) + `${key} = Nothing\n`
+                        break
                     }
 
                     if (Array.isArray(value)) 
@@ -85,24 +82,26 @@ class Spcial
 
                         if (value.findIndex((element) => typeof element == "object") != -1) 
                         {
-                            spcialString += " ".repeat(indent) + `${key} :=`
+                            spcialString += " ".repeat(indent) + `${key} :=\n`
 
                             for (const element of value)
                             {
-                                spcialString += " ".repeat(indent + 4) + `* ${element.toSpcialEquivalent(element, 0).replace(`${key} =`, "").trim()}`
+                                spcialString += " ".repeat(indent + 4) + `* :\n${this.toSpcialEquivalent(element, indent + 8).replace(`${key} =`, "").trimEnd()}`
                             }
+
+                            spcialString += "\n"
                         } 
                         else 
                         {
-                            let arrString = ""
+                            const array = this.toSpcialEquivalent(value, 0).split("\n")
 
-                            for (const element of value)
+                            for (let i = 0; i < array.length; i++)
                             {
-                                // Convert but remove the "key =" part
-                                arrString += this.toSpcialEquivalent(element, 0).replace(`${key} =`, "") + ","
+                                array[i] = array[i].replace(/.*=/g, "").trimStart()
                             }
 
-                            spcialString += " ".repeat(indent) + `${key} = [${arrString}]\n`
+                            array.pop()
+                            spcialString += " ".repeat(indent) + `${key} = [${array.toString()}]\n`
                         }
                     } 
                     else 
@@ -264,7 +263,7 @@ class Spcial
                 obj[linesOfCode[lineNum].trim().replace(":", "")] = this.parse(children)
                 
                 // Skip lines
-                lineNum += children.length
+                lineNum += children.split("\n").length //this is string
             } 
             else if (linesOfCode[lineNum].includes("=")) 
             {
@@ -316,7 +315,7 @@ root:
     bool_val = True
     nil = Nothing
     array :=
-        * objInArray:
+        * :
             isIt = True
     nestedObj:
         prop1 = "value1"
